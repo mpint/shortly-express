@@ -2,6 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var bcrypt = require('bcrypt-nodejs');
 
 
 var db = require('./app/config');
@@ -23,24 +24,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
+app.get('/',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
-app.post('/links', 
+app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
@@ -78,6 +79,62 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.post('/signup', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  bcrypt.genSalt(10, function(err, salt) {
+    console.log('\nSALT: ', salt);
+    console.log('\nPassword: ', password);
+    bcrypt.hash(password, salt, null, function(err, hash) {
+      console.log('wtf!');
+      if (err) { throw new Error(err); }
+      console.log('\nHASH: ', hash);
+    });
+  });
+
+
+
+});
+
+app.post('/login', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+
+});
+
+
+
+
+
+
+
+
+
+
+/*
+need login
+  - used for login if user is created
+
+  1. check username
+  2. get salt from database for supplied username
+  3. pass password + salt into hashing function
+  4. check output against database hashed password
+    a. if yes, log in and return token
+    b. if no, return error bad password
+
+need signup
+  - used for user creation
+
+  1. user goes to user creation page and makes a post request
+  with username and password
+  2. create a salt
+  3. store username + salt in database
+  4. pass password and salt through hashing function and store in database
+  5. run login script on user
+
+*/
 
 
 /************************************************************/
