@@ -238,7 +238,6 @@ describe('', function() {
   }); // 'Priviledged Access'
 
   describe('Account Creation:', function(){
-    console.log('fooooooooooooooood');
     it('Signup creates a user record', function(done) {
       var options = {
         'method': 'POST',

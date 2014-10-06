@@ -41,8 +41,7 @@ function(req, res) {
   });
 });
 
-app.post('/links',
-function(req, res) {
+app.post('/links', function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
@@ -82,34 +81,30 @@ function(req, res) {
 app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
+  new User({username: username}).fetch().then(function (found) {
+    if (found) {
+      // eventually, if found, return error = user already exists
+      res.send(200, found.attributes);
+    } else {
+      util.generateHash(password, function (hash) {
+        var user = new User({
+          username: username,
+          hash: hash
+        });
 
-  bcrypt.genSalt(10, function(err, salt) {
-    console.log('\nSALT: ', salt);
-    console.log('\nPassword: ', password);
-    bcrypt.hash(password, salt, null, function(err, hash) {
-      console.log('wtf!');
-      if (err) { throw new Error(err); }
-      console.log('\nHASH: ', hash);
-    });
+        user.save().then(function (newUser) {
+          Users.add(newUser);
+          res.send(200, newUser);
+        });
+      });
+    }
   });
-
-
-
 });
 
 app.post('/login', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
-
-
 });
-
-
-
-
-
-
-
 
 
 
