@@ -6,6 +6,7 @@ var Users = require('../app/collections/users');
 var User = require('../app/models/user');
 var Links = require('../app/collections/links');
 var Link = require('../app/models/link');
+var util = require('../lib/utility');
 
 /************************************************************/
 // Mocha doesn't have a way to designate pending before blocks.
@@ -40,10 +41,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
 
     // delete user Phillip from db so it can be created later for the test
@@ -52,10 +53,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
   });
 
@@ -284,18 +285,20 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function(){
+  describe('Account Login:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
     beforeEach(function(done){
-      new User({
-          'username': 'Phillip',
-          'password': 'Phillip'
-      }).save().then(function(){
-        done()
+      util.generateHash('Phillip', function (hash) {
+        new User({
+          username: 'Phillip',
+          hash: hash
+        }).save().then(function(){
+          done()
+        });
       });
-    })
+    });
 
     it('Logs in existing users', function(done) {
       var options = {
