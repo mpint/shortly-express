@@ -3,7 +3,8 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
-
+var session = require('express-session');
+var uuid = require('uuid');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,28 +22,49 @@ app.use(partials());
 app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(session({
+  genid: function (req) {
+    return uuid.v1();
+  },
+  secret: '$MichaelRick$'
+}));
+
 app.use(express.static(__dirname + '/public'));
 
-
 app.get('/', function(req, res) {
-  res.render('index');
+  util.loginStatus(req, res, function(status) {
+    status ? res.render('index') : res.redirect('/login');
+  });
 });
 
 app.get('/create', function(req, res) {
-  res.render('index');
+  util.loginStatus(req, res, function(status) {
+    status ? res.render('create') : res.redirect('/login');
+  });
 });
 
 app.get('/signup', function(req, res) {
-  res.render('signup');
+  util.loginStatus(req, res, function(status) {
+    status ? res.redirect('/') : res.render('signup');
+  });
 });
 
 app.get('/login', function(req, res) {
-  res.render('login');
+  util.loginStatus(req, res, function(status) {
+    status ? res.redirect('/') : res.render('login');
+  });
 });
 
 app.get('/links', function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.send(200, links.models);
+  util.loginStatus(req, res, function(status) {
+    if (status) {
+      Links.reset().fetch().then(function(links) {
+        res.send(200, links.models);
+      });
+    } else {
+      res.redirect('/login');
+    }
   });
 });
 
@@ -100,8 +122,9 @@ app.post('/signup', function(req, res) {
 
         user.save().then(function (newUser) {
           Users.add(newUser);
+          req.session.loggedIn = true;
           res.set('location', '/');
-          res.render('index');
+          res.redirect('/');
         });
       });
     }
@@ -133,6 +156,16 @@ need signup
   3. store username + salt in database
   4. pass password and salt through hashing function and store in database
   5. run login script on user
+
+
+
+create a system so that when a user logs in, the session has
+a property called login status set to true
+and then when a user tries to visit any web page we should
+check login status
+  if true allow user to go to page
+  if false redirect to login page
+  simple**as**THAT!
 
 */
 
