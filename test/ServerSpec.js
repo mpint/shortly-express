@@ -150,7 +150,7 @@ describe('', function() {
 
     }); // 'Shortening links'
 
-    xdescribe('With previously saved urls:', function(){
+    describe('With previously saved urls:', function(){
 
       var link;
 
@@ -196,7 +196,7 @@ describe('', function() {
         });
       });
 
-      it('Returns all of the links to display on the links page', function(done) {
+      xit('Returns all of the links to display on the links page', function(done) {
         var options = {
           'method': 'GET',
           'uri': 'http://127.0.0.1:4568/links'
@@ -285,7 +285,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function(){
+  describe('Account Login:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 

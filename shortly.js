@@ -4,6 +4,8 @@ var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
 var session = require('express-session');
+// var cookieParser = require('cookie-parser');
+var connect = require('connect');
 var uuid = require('uuid');
 
 var db = require('./app/config');
@@ -29,6 +31,9 @@ app.use(session({
   },
   secret: '$MichaelRick$'
 }));
+console.log(connect);
+// app.use(cookieParser({
+// }))
 
 app.use(express.static(__dirname + '/public'));
 
@@ -134,40 +139,6 @@ app.post('/signup', function(req, res) {
 app.post('/login', function(req, res) {
   util.userLoginValidate(req, res, Users);
 });
-
-
-/*
-need login
-  - used for login if user is created
-
-  1. check username
-  2. get salt from database for supplied username
-  3. pass password + salt into hashing function
-  4. check output against database hashed password
-    a. if yes, log in and return token
-    b. if no, return error bad password
-
-need signup
-  - used for user creation
-
-  1. user goes to user creation page and makes a post request
-  with username and password
-  2. create a salt
-  3. store username + salt in database
-  4. pass password and salt through hashing function and store in database
-  5. run login script on user
-
-
-
-create a system so that when a user logs in, the session has
-a property called login status set to true
-and then when a user tries to visit any web page we should
-check login status
-  if true allow user to go to page
-  if false redirect to login page
-  simple**as**THAT!
-
-*/
 
 
 /************************************************************/
