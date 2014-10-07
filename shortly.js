@@ -24,18 +24,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/',
-function(req, res) {
+app.get('/', function(req, res) {
   res.render('index');
 });
 
-app.get('/create',
-function(req, res) {
+app.get('/create', function(req, res) {
   res.render('index');
 });
 
-app.get('/links',
-function(req, res) {
+app.get('/links', function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
@@ -84,7 +81,8 @@ app.post('/signup', function(req, res) {
   new User({username: username}).fetch().then(function (found) {
     if (found) {
       // eventually, if found, return error = user already exists
-      res.send(200, found.attributes);
+      // console.log('checkers');
+      // res.send(200, found.attributes);
     } else {
       util.generateHash(password, function (hash) {
         var user = new User({
@@ -94,7 +92,8 @@ app.post('/signup', function(req, res) {
 
         user.save().then(function (newUser) {
           Users.add(newUser);
-          res.send(200, newUser);
+          res.set('location', '/');
+          res.render('index');
         });
       });
     }
