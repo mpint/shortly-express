@@ -4,9 +4,7 @@ var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
 var session = require('express-session');
-// var cookieParser = require('cookie-parser');
-var connect = require('connect');
-var uuid = require('uuid');
+var cookieParser = require('cookie-parser');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -16,7 +14,7 @@ var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
 var app = express();
-
+var whatsMyName = 'richard'
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -25,15 +23,7 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(session({
-  genid: function (req) {
-    return uuid.v1();
-  },
-  secret: '$MichaelRick$'
-}));
-console.log(connect);
-// app.use(cookieParser({
-// }))
+app.use(cookieParser('$MichaelRick$'));
 
 app.use(express.static(__dirname + '/public'));
 
@@ -45,7 +35,7 @@ app.get('/', function(req, res) {
 
 app.get('/create', function(req, res) {
   util.loginStatus(req, res, function(status) {
-    status ? res.render('create') : res.redirect('/login');
+    status ? res.render('index') : res.redirect('/login');
   });
 });
 
@@ -115,24 +105,20 @@ app.post('/signup', function(req, res) {
   var password = req.body.password;
   new User({username: username}).fetch().then(function (found) {
     if (found) {
-      // eventually, if found, return error = user already exists
-      // console.log('checkers');
-      // res.send(200, found.attributes);
-    } else {
-      util.generateHash(password, function (hash) {
-        var user = new User({
-          username: username,
-          hash: hash
-        });
-
-        user.save().then(function (newUser) {
-          Users.add(newUser);
-          req.session.loggedIn = true;
-          res.set('location', '/');
-          res.redirect('/');
-        });
-      });
+      res.set('location', '/');
+      res.redirect('/');
+      return;
     }
+    var user = new User({
+      username: username,
+      hash: password
+    }).save().then(function (newUser) {
+      newUser.save();
+      Users.add(newUser);
+      res.cookie('loggedIn', 'true', {signed: true});
+      res.set('location', '/');
+      res.redirect('/');
+    });
   });
 });
 
@@ -140,6 +126,9 @@ app.post('/login', function(req, res) {
   util.userLoginValidate(req, res, Users);
 });
 
+app.post('/logout', function(req, res) {
+  util.logout(req, res);
+});
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
